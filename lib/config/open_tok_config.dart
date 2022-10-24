@@ -1,0 +1,5 @@
+class OpenTokConfig {
+  static const String apiKey = "";
+  static const String sessionID = "2_MX40NjYzMzg2Mn5-MTY2Nzc4OTgwNTE0MX5mTjZ1Zi8vTzZTamVWbGdqMDluRFg5UGF-fg";
+  static const String token = "T1==cGFydG5lcl9pZD00NjYzMzg2MiZzaWc9OGNhNDE5MjdmN2E3ZGY2NzBiNmU1MzlmZjJiZDRiMzRhNzAwZTIxYzpzZXNzaW9uX2lkPTJfTVg0ME5qWXpNemcyTW41LU1UWTJOemM0T1Rnd05URTBNWDVtVGpaMVppOHZUelpUYW1WV2JHZHFNRGx1UkZnNVVHRi1mZyZjcmVhdGVfdGltZT0xNjY3Nzg5ODA1Jm5vbmNlPTAuMTYxODYyOTg4OTIyNDQyNzcmcm9sZT1wdWJsaXNoZXImZXhwaXJlX3RpbWU9MTY3MDI5NTQwNSZpbml0aWFsX2xheW91dF9jbGFzc19saXN0PQ==";
+}
