@@ -5,21 +5,18 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.NonNull
+import br.com.mazingdev.flutter_vonage.R
 import br.com.mazingdev.flutter_vonage.config.SdkState
+import br.com.mazingdev.flutter_vonage.multi_video.*
+import com.opentok.android.*
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import com.opentok.android.*
-import br.com.mazingdev.flutter_vonage.FlutterVonagePlugin
-import br.com.mazingdev.flutter_vonage.R
-import br.com.mazingdev.flutter_vonage.multi_video.*
-import io.flutter.plugin.platform.PlatformView
 
 /** FlutterVonagePlugin */
 class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
@@ -66,6 +63,8 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
       updateFlutterState(SdkState.wait, multiVideoMethodChannel)
       initSession(apiKey, sessionId, token)
       result.success("")
+    } else if (call.method == "endSession") {
+      endSession()
     } else {
       result.notImplemented()
     }
@@ -81,7 +80,6 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
 
   private fun addFlutterChannelListener() {
     flutterEngine?.dartExecutor?.binaryMessenger?.let {
-      Log.d("addFlutterChannelListener", "CHEGOUUUUUUUUUUUUU")
       setMultiVideoMethodChannel(it)
     }
   }
@@ -97,6 +95,9 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
           updateFlutterState(SdkState.wait, multiVideoMethodChannel)
           initSession(apiKey, sessionId, token)
           result.success("")
+        }
+        "endSession" -> {
+          endSession()
         }
         else -> {
           result.notImplemented()
@@ -200,6 +201,13 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
         "MainActivity",
         "onStreamDestroyed: Publisher Stream Destroyed. Own stream " + stream.streamId
       )
+
+      // Recalculate view Ids
+      for (i in subscribers.indices) {
+        multiVideoPlatformView.mainContainer.removeView(subscribers[i].view)
+      }
+      subscribers.clear()
+      subscriberStreams.clear()
     }
 
     override fun onError(publisherKit: PublisherKit, opentokError: OpentokError) {
@@ -220,6 +228,11 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
 //    calculateLayout()
   }
 
+  fun endSession() {
+    session?.unpublish(publisher)
+    session?.disconnect()
+  }
+
   private fun getResIdForSubscriberIndex(index: Int): Int {
     val arr = context!!.resources.obtainTypedArray(R.array.subscriber_view_ids)
     val subId = arr.getResourceId(index, 0)
@@ -233,11 +246,8 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
     publisher?.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE, BaseVideoRenderer.STYLE_VIDEO_FILL)
   }
   private fun calculateLayout() {
-    Log.d("Multi Video", "CHAMOU ACALCULATE")
-
     val set = ConstraintSetHelper(R.id.main_container)
     val size = subscribers.size
-    Log.d("Multi Video", size.toString())
     if (size == 1) {
       // Publisher
       // Subscriber

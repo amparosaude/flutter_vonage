@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_vonage/flutter_vonage.dart';
 import 'multi_video.dart';
 
 
@@ -35,6 +36,56 @@ class HomeScreen extends StatelessWidget {
     ));
   }
 }
+
+Widget renderButtons() {
+  return Container(
+    margin: EdgeInsets.only(bottom: 34),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        GestureDetector(
+          child: Container(
+            padding: EdgeInsets.all(15),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                ),
+            child: Icon(
+              Icons.mic_off_rounded,
+              size: 32,
+            ),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 25),
+          child: GestureDetector(
+            onTap: FlutterVonage.endSession(),
+            child: Container(
+              padding: EdgeInsets.all(15),
+              child: Icon(
+                Icons.phone,
+                color: Colors.red,
+                size: 32,
+              ),
+            ),
+          ),
+        ),
+        GestureDetector(
+          child: Container(
+            padding: EdgeInsets.all(15),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+            ),
+            child: Icon(
+              Icons.videocam_off,
+              size: 32,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 
 Widget _updateView(BuildContext context) {
     return

@@ -9,6 +9,12 @@ import 'package:flutter_vonage/subscriber.dart';
 import 'package:flutter_vonage_example/src/config/sdk_states.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+class OpenTokConfig {
+  static const String apiKey = "";
+  static const String sessionID = "2_MX40NjYzMzg2Mn5-MTY2Nzc4OTgwNTE0MX5mTjZ1Zi8vTzZTamVWbGdqMDluRFg5UGF-fg";
+  static const String token = "T1==cGFydG5lcl9pZD00NjYzMzg2MiZzaWc9OGNhNDE5MjdmN2E3ZGY2NzBiNmU1MzlmZjJiZDRiMzRhNzAwZTIxYzpzZXNzaW9uX2lkPTJfTVg0ME5qWXpNemcyTW41LU1UWTJOemM0T1Rnd05URTBNWDVtVGpaMVppOHZUelpUYW1WV2JHZHFNRGx1UkZnNVVHRi1mZyZjcmVhdGVfdGltZT0xNjY3Nzg5ODA1Jm5vbmNlPTAuMTYxODYyOTg4OTIyNDQyNzcmcm9sZT1wdWJsaXNoZXImZXhwaXJlX3RpbWU9MTY3MDI5NTQwNSZpbml0aWFsX2xheW91dF9jbGFzc19saXN0PQ==";
+}
+
 class MultiVideo extends StatelessWidget {
   const MultiVideo({Key key}) : super(key: key);
 
@@ -42,8 +48,6 @@ class _CallWidgetState extends State<CallWidget> {
   }
 
   Future<dynamic> methodCallHandler(MethodCall methodCall) async {
-    print('CHECOU AQUI');
-    print(methodCall.method);
     switch (methodCall.method) {
       case 'updateState':
         {
@@ -66,7 +70,11 @@ class _CallWidgetState extends State<CallWidget> {
 
   void initSession() async {
     await requestPermissions();
-    await FlutterVonage.initSession();
+    await FlutterVonage.initSession(
+      apiKey: OpenTokConfig.apiKey,
+      sessionId: OpenTokConfig.sessionID,
+      token: OpenTokConfig.token,
+    );
   }
 
   @override
@@ -76,9 +84,60 @@ class _CallWidgetState extends State<CallWidget> {
     );
   }
 
+
+  Widget renderButtons() {
+    return Container(
+      margin: EdgeInsets.only(bottom: 34),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          GestureDetector(
+            child: Container(
+              padding: EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Icon(
+                Icons.mic_off_rounded,
+                size: 32,
+                color: Colors.red,
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 25),
+            child: GestureDetector(
+              onTap: FlutterVonage.endSession,
+              child: Container(
+                padding: EdgeInsets.all(15),
+                child: Icon(
+                  Icons.phone,
+                  size: 32,
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          ),
+          GestureDetector(
+            child: Container(
+              padding: EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Icon(
+                Icons.videocam_off,
+                size: 32,
+                color: Colors.red,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   Widget _updateView() {
-    print('>>>>>>>>>>>>>>');
-    print(_sdkState);
     if (_sdkState == SdkState.loggedOut) {
       return ElevatedButton(
           onPressed: () {
@@ -95,6 +154,10 @@ class _CallWidgetState extends State<CallWidget> {
         child: Stack(
           children: [
             Subscriber(),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: renderButtons(),
+            ),
             Align(
               alignment: Alignment.topRight,
               child: Container(
