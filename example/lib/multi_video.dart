@@ -11,12 +11,14 @@ import 'package:permission_handler/permission_handler.dart';
 
 class OpenTokConfig {
   static const String apiKey = "";
-  static const String sessionID = "2_MX40NjYzMzg2Mn5-MTY2Nzc4OTgwNTE0MX5mTjZ1Zi8vTzZTamVWbGdqMDluRFg5UGF-fg";
-  static const String token = "T1==cGFydG5lcl9pZD00NjYzMzg2MiZzaWc9OGNhNDE5MjdmN2E3ZGY2NzBiNmU1MzlmZjJiZDRiMzRhNzAwZTIxYzpzZXNzaW9uX2lkPTJfTVg0ME5qWXpNemcyTW41LU1UWTJOemM0T1Rnd05URTBNWDVtVGpaMVppOHZUelpUYW1WV2JHZHFNRGx1UkZnNVVHRi1mZyZjcmVhdGVfdGltZT0xNjY3Nzg5ODA1Jm5vbmNlPTAuMTYxODYyOTg4OTIyNDQyNzcmcm9sZT1wdWJsaXNoZXImZXhwaXJlX3RpbWU9MTY3MDI5NTQwNSZpbml0aWFsX2xheW91dF9jbGFzc19saXN0PQ==";
+  static const String sessionID = "1_MX40NjYzMzg2Mn5-MTY2ODExNTk1ODk3Mn4rZXFZcTRBSnJteDlvU09iYnlGTHpSQUF-fg";
+  static const String token = "T1==cGFydG5lcl9pZD00NjYzMzg2MiZzaWc9ODhjMTczMmFmNzYzOTdmOGJmM2YyZTMwZWI5NGM4NjJmNjdhYjYxYTpzZXNzaW9uX2lkPTFfTVg0ME5qWXpNemcyTW41LU1UWTJPREV4TlRrMU9EazNNbjRyWlhGWmNUUkJTbkp0ZURsdlUwOWlZbmxHVEhwU1FVRi1mZyZjcmVhdGVfdGltZT0xNjY4MTE1OTU5Jm5vbmNlPTAuOTkxNTg0MDI0OTI2MTA4MyZyb2xlPXB1Ymxpc2hlciZleHBpcmVfdGltZT0xNjcwNjIxNTU4JmluaXRpYWxfbGF5b3V0X2NsYXNzX2xpc3Q9";
 }
 
 class MultiVideo extends StatelessWidget {
   const MultiVideo({Key key}) : super(key: key);
+  static bool cameraStatus = true;
+  static bool microphoneStatus = true;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +41,7 @@ class CallWidget extends StatefulWidget {
 
 class _CallWidgetState extends State<CallWidget> {
   SdkState _sdkState = SdkState.loggedOut;
-
+  int subscibersSize = 0;
   static const platformMethodChannel = MethodChannel('com.vonage.multi_video');
 
   _CallWidgetState() {
@@ -57,7 +59,11 @@ class _CallWidgetState extends State<CallWidget> {
               return v.toString() == arguments;
             });
           });
+          print(_sdkState);
         }
+        break;
+      case 'updateSubscribers':
+        subscibersSize = methodCall.arguments;
         break;
       default:
         throw MissingPluginException('notImplemented');
@@ -92,6 +98,7 @@ class _CallWidgetState extends State<CallWidget> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           GestureDetector(
+            onTap: changeMicrophoneStatus,
             child: Container(
               padding: EdgeInsets.all(15),
               decoration: BoxDecoration(
@@ -119,6 +126,7 @@ class _CallWidgetState extends State<CallWidget> {
             ),
           ),
           GestureDetector(
+            onTap: changeCameraStatus,
             child: Container(
               padding: EdgeInsets.all(15),
               decoration: BoxDecoration(
@@ -176,6 +184,25 @@ class _CallWidgetState extends State<CallWidget> {
     } else {
       return const Center(child: Text("ERROR"));
     }
+  }
+
+  void changeCameraStatus() {
+    if (MultiVideo.cameraStatus) {
+      FlutterVonage.disableCamera();
+      MultiVideo.cameraStatus = false;
+      return;
+    }
+    FlutterVonage.enableCamera();
+    MultiVideo.cameraStatus = true;
+  }
+  void changeMicrophoneStatus() {
+    if (MultiVideo.microphoneStatus) {
+      FlutterVonage.disableMicrophone();
+      MultiVideo.microphoneStatus = false;
+      return;
+    }
+    FlutterVonage.enableMicrophone();
+    MultiVideo.microphoneStatus = true;
   }
 }
 

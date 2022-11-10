@@ -4,5 +4,6 @@ enum class SdkState {
     loggedOut,
     loggedIn,
     wait,
-    error
+    error,
+    streamReceived,
 }

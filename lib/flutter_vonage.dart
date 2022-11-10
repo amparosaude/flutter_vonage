@@ -32,6 +32,19 @@ class FlutterVonage {
     }
   }
 
+
+  static enableCamera() {
+    _channel.invokeMethod('enableCamera');
+  }
+  static disableCamera() {
+    _channel.invokeMethod('disableCamera');
+  }
+  static enableMicrophone() {
+    _channel.invokeMethod('enableMicrophone');
+  }
+  static disableMicrophone() {
+    _channel.invokeMethod('disableMicrophone');
+  }
   static endSession() async {
     await _channel.invokeMethod('endSession');
   }

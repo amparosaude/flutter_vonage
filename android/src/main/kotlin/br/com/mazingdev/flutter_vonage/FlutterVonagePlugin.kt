@@ -65,6 +65,14 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
       result.success("")
     } else if (call.method == "endSession") {
       endSession()
+    } else if (call.method == "enableCamera") {
+      enableCamera()
+    } else if (call.method == "disableCamera") {
+      disableCamera()
+    } else if (call.method == "enableMicrophone") {
+      enableMicrophone()
+    } else if (call.method == "disableMicrophone") {
+      disableMicrophone()
     } else {
       result.notImplemented()
     }
@@ -115,6 +123,15 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
     }
   }
 
+  fun updateSubscribers(subscriberLength: Int, channel: String) {
+    Handler(Looper.getMainLooper()).post {
+      flutterEngine?.dartExecutor?.binaryMessenger?.let {
+        MethodChannel(it, channel)
+          .invokeMethod("updateSubscribers", subscriberLength.toString())
+      }
+    }
+  }
+
   fun updateFlutterMessages(arguments: HashMap<String, Any>, channel: String){
     Handler(Looper.getMainLooper()).post {
       flutterEngine?.dartExecutor?.binaryMessenger?.let {
@@ -160,6 +177,7 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
       val subId = getResIdForSubscriberIndex(subscribers.size - 1)
       subscriber.view.id = subId
       multiVideoPlatformView.mainContainer.addView(subscriber.view)
+      updateSubscribers(subscribers.size, multiVideoMethodChannel);
       calculateLayout()
     }
 
@@ -168,7 +186,6 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
         "MainActivity",
         "onStreamDropped: Stream Dropped: " + stream.streamId + " in session: " + session.sessionId
       )
-
       val subscriber = subscriberStreams[stream] ?: return
       subscribers.remove(subscriber)
       subscriberStreams.remove(stream)
@@ -178,6 +195,7 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
       for (i in subscribers.indices) {
         subscribers[i].view.id = getResIdForSubscriberIndex(i)
       }
+      updateSubscribers(subscribers.size, multiVideoMethodChannel)
       calculateLayout()
     }
 
@@ -231,6 +249,22 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
   fun endSession() {
     session?.unpublish(publisher)
     session?.disconnect()
+  }
+
+  fun disableMicrophone() {
+    publisher?.setPublishAudio(false)
+  }
+
+  fun enableMicrophone() {
+    publisher?.setPublishAudio(true)
+  }
+
+  fun disableCamera() {
+    publisher?.setPublishVideo(false)
+  }
+
+  fun enableCamera() {
+    publisher?.setPublishVideo(true)
   }
 
   private fun getResIdForSubscriberIndex(index: Int): Int {
