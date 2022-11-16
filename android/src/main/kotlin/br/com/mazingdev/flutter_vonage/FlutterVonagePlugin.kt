@@ -22,7 +22,6 @@ import io.flutter.plugin.common.MethodChannel.Result
 class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
   val multiVideoMethodChannel = "com.vonage.multi_video"
 
-  private var multiVideo: MultiVideo? = null
   private lateinit var context: Context
   private lateinit var channel : MethodChannel
   private lateinit var flutterEngine: FlutterEngine
@@ -33,12 +32,14 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
   private val subscriberStreams = HashMap<Stream, Subscriber>()
 
   private lateinit var multiVideoPlatformView: MultiVideoPlatformView
+  private lateinit var publisherView: PublisherView
   private lateinit var publisherFactory: PublisherFactory
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_vonage")
     channel.setMethodCallHandler(this)
     context = flutterPluginBinding.getApplicationContext();
     multiVideoPlatformView = MultiVideoFactory.getViewInstance(context)
+    publisherView = PublisherFactory.getViewInstance(context)
     flutterEngine = flutterPluginBinding.getFlutterEngine()
     publisherFactory = PublisherFactory()
     flutterEngine
@@ -49,7 +50,6 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
       .platformViewsController
       .registry
       .registerViewFactory("publisher-opentok-multi-video-container", publisherFactory)
-
 
     addFlutterChannelListener()
   }
@@ -172,9 +172,10 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
 
       val subscriber = Subscriber.Builder(context, stream).build()
       session.subscribe(subscriber)
+      subscriber?.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE, BaseVideoRenderer.STYLE_VIDEO_FILL)
       subscribers.add(subscriber)
       subscriberStreams[stream] = subscriber
-      val subId = getResIdForSubscriberIndex(subscribers.size - 1)
+      val subId = if (subscribers.size == 1) R.id.subscriber_view_1 else R.id.subscriber_view_2
       subscriber.view.id = subId
       multiVideoPlatformView.mainContainer.addView(subscriber.view)
       updateSubscribers(subscribers.size, multiVideoMethodChannel);
@@ -191,7 +192,6 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
       subscriberStreams.remove(stream)
       multiVideoPlatformView.mainContainer.removeView(subscriber.view)
 
-      // Recalculate view Ids
       for (i in subscribers.indices) {
         subscribers[i].view.id = getResIdForSubscriberIndex(i)
       }
@@ -219,8 +219,6 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
         "MainActivity",
         "onStreamDestroyed: Publisher Stream Destroyed. Own stream " + stream.streamId
       )
-
-      // Recalculate view Ids
       for (i in subscribers.indices) {
         multiVideoPlatformView.mainContainer.removeView(subscribers[i].view)
       }
@@ -240,10 +238,8 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
     session?.connect(token)
     startPublisherPreview()
     publisher?.view?.id = R.id.publisher_view_id
-    var multiVideo: PublisherView = publisherFactory.create(context,R.id.publisher_view_id, null)
-    multiVideo.mainContainer.addView(publisher?.view)
-//    multiVideoPlatformView.mainContainer.addView(publisher?.view)
-//    calculateLayout()
+    publisherFactory.create(context,R.id.publisher_view_id, null)
+    publisherView.mainContainer.addView(publisher?.view)
   }
 
   fun endSession() {
@@ -268,10 +264,7 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
   }
 
   private fun getResIdForSubscriberIndex(index: Int): Int {
-    val arr = context!!.resources.obtainTypedArray(R.array.subscriber_view_ids)
-    val subId = arr.getResourceId(index, 0)
-    arr.recycle()
-    return subId
+    return if (index == 0) R.id.subscriber_view_1 else R.id.subscriber_view_2
   }
 
   private fun startPublisherPreview() {
@@ -283,15 +276,7 @@ class FlutterVonagePlugin: FlutterPlugin, MethodCallHandler, FlutterActivity() {
     val set = ConstraintSetHelper(R.id.main_container)
     val size = subscribers.size
     if (size == 1) {
-      // Publisher
-      // Subscriber
       set.layoutViewFullScreen(getResIdForSubscriberIndex(0))
-//      set.layoutViewAboveView(R.id.publisher_view_id, getResIdForSubscriberIndex(0))
-//      set.layoutViewWithTopBound(R.id.publisher_view_id, R.id.main_container)
-//      set.layoutViewWithBottomBound(getResIdForSubscriberIndex(0), R.id.main_container)
-//      set.layoutViewAllContainerWide(R.id.publisher_view_id, R.id.main_container)
-//      set.layoutViewAllContainerWide(getResIdForSubscriberIndex(0), R.id.main_container)
-//      set.layoutViewHeightPercent(getResIdForSubscriberIndex(0), .5f)
     } else if (size > 1 && size % 2 == 0) {
       set.layoutViewAboveView(getResIdForSubscriberIndex(0), getResIdForSubscriberIndex(1))
       set.layoutViewWithTopBound(getResIdForSubscriberIndex(0), R.id.main_container)

@@ -18,7 +18,7 @@ class PublisherContainer @JvmOverloads constructor(
         private set
 
     init {
-        val view = LayoutInflater.from(context).inflate(R.layout.multi_video, this, true)
-        mainContainer = view.findViewById(R.id.main_container)
+        val view = LayoutInflater.from(context).inflate(R.layout.publisher_video, this, true)
+        mainContainer = view.findViewById(R.id.publisher_container)
     }
 }

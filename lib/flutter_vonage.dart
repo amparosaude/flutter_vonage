@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_vonage/config/open_tok_config.dart';
 import 'package:flutter_vonage/publisher.dart';
 import 'package:flutter_vonage/subscriber.dart';
 
@@ -21,17 +20,14 @@ class FlutterVonage {
       'sessionId': sessionId,
       'token': token
     };
-
     try {
       await _channel.invokeMethod('initSession', params);
-
     } on PlatformException catch (e) {
       if (kDebugMode) {
         print(e);
       }
     }
   }
-
 
   static enableCamera() {
     _channel.invokeMethod('enableCamera');
